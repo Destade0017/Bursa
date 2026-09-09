@@ -67,6 +67,14 @@ app.use(
 );
 
 // Register API Routes
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'BURSA API Server is running live.',
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.use('/api', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api', paymentRoutes);
@@ -77,6 +85,11 @@ app.use('/api/invoices', invoiceRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/fee-schedules', feeScheduleRoutes);
 app.use('/api/public', publicRoutes);
+
+// Global 404 fallback
+app.use((req, res) => {
+  res.status(404).json({ error: 'Endpoint not found on BURSA API.' });
+});
 
 // Start Server
 app.listen(PORT, () => {
