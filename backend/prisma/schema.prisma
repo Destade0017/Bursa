@@ -1,0 +1,195 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model School {
+  id               String    @id @default(uuid())
+  slug             String    @unique
+  name             String
+  phone            String
+  email            String    @unique
+  address          String?
+  logoUrl          String?
+  academicSession  String    @default("2026/2027")
+  currentTerm      String    @default("First Term")
+  bankName         String?   @default("Wema Bank PLC")
+  accountNumber    String?   @default("0123456789")
+  accountName      String?
+  currency         String    @default("NGN (₦)")
+  paymentRefFormat String?   @default("BURSA-{SESSION}-{STUDENT_ID}")
+  receiptPrefix    String?   @default("RCP-")
+  receiptFooter    String?   @default("Thank you for your prompt payment. Official BURSA e-Receipt.")
+  createdAt        DateTime  @default(now())
+
+  // Relations
+  students             Student[]
+  invoices             Invoice[]
+  suspenseTransactions SuspenseTransaction[]
+  staff                Staff[]
+  feeSchedules         FeeSchedule[]
+  cashHandovers        CashHandover[]
+}
+
+model Staff {
+  id           String   @id @default(uuid())
+  schoolId     String
+  fullName     String
+  email        String   @unique
+  phone        String
+  passwordHash String
+  role         String   @default("BURSAR") // Allowed values: "PROPRIETOR", "BURSAR"
+  createdAt    DateTime @default(now())
+
+  // Relations
+  school              School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  recordedPayments    Payment[]      @relation("StaffRecordedPayments")
+  submittedHandovers  CashHandover[] @relation("BursarHandovers")
+  confirmedHandovers  CashHandover[] @relation("ProprietorConfirmations")
+}
+
+model Student {
+  id              String          @id @default(uuid())
+  schoolId        String
+  admissionNumber String?         @unique
+  firstName       String
+  lastName        String
+  classGrade      String
+  parentName      String
+  parentPhone     String
+  createdAt       DateTime        @default(now())
+
+  // Relations
+  school         School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  invoices       Invoice[]
+  virtualAccount VirtualAccount?
+}
+
+model VirtualAccount {
+  id            String   @id @default(uuid())
+  studentId     String   @unique
+  accountNumber String   @unique
+  bankName      String
+  accountName   String
+  status        String   @default("ACTIVE")
+  createdAt     DateTime @default(now())
+
+  // Relation
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id              String        @id @default(uuid())
+  studentId       String
+  schoolId        String
+  term            String
+  academicSession String
+  totalAmountKobo Int
+  amountPaidKobo  Int           @default(0)
+  status          String        @default("UNPAID") // UNPAID, PART_PAID, PAID
+  dueDate         DateTime?
+  createdAt       DateTime      @default(now())
+
+  // Relations
+  student         Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  school          School        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  items           InvoiceItem[]
+  payments        Payment[]
+}
+
+model InvoiceItem {
+  id          String   @id @default(uuid())
+  invoiceId   String
+  description String
+  amountKobo  Int
+
+  // Relation
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id                   String        @id @default(uuid())
+  invoiceId            String
+  transactionReference String        @unique
+  amountKobo           Int
+  paymentMethod        String        @default("BANK_TRANSFER")
+  paidAt               DateTime      @default(now())
+  recordedByStaffId    String?
+  isCashRemitted       Boolean       @default(false)
+  cashHandoverId       String?
+
+  // Relations
+  invoice              Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  recordedByStaff      Staff?        @relation("StaffRecordedPayments", fields: [recordedByStaffId], references: [id], onDelete: SetNull)
+  cashHandover         CashHandover? @relation(fields: [cashHandoverId], references: [id], onDelete: SetNull)
+}
+
+model SuspenseTransaction {
+  id                     String   @id @default(uuid())
+  schoolId               String
+  transactionReference   String   @unique
+  senderName             String
+  attemptedAccountNumber String?
+  amountKobo             Int
+  reason                 String   // e.g., "UNRECOGNIZED_ACCOUNT" or "NO_OPEN_INVOICE"
+  status                 String   @default("PENDING") // "PENDING", "ALLOCATED"
+  allocatedStudentId     String?
+  createdAt              DateTime @default(now())
+
+  // Relation
+  school                 School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+}
+
+model FeeSchedule {
+  id              String            @id @default(uuid())
+  schoolId        String
+  classGrade      String
+  term            String
+  academicSession String
+  totalAmountKobo Int
+  createdAt       DateTime          @default(now())
+
+  // Relations
+  school          School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  items           FeeScheduleItem[]
+
+  @@unique([schoolId, classGrade, term, academicSession])
+}
+
+model FeeScheduleItem {
+  id            String      @id @default(uuid())
+  feeScheduleId String
+  description   String
+  amountKobo    Int
+
+  // Relation
+  feeSchedule   FeeSchedule @relation(fields: [feeScheduleId], references: [id], onDelete: Cascade)
+}
+
+model CashHandover {
+  id                      String    @id @default(uuid())
+  schoolId                String
+  bursarId                String
+  amountKobo              Int
+  receiptCount            Int
+  status                  String    @default("PENDING_VERIFICATION") // "PENDING_VERIFICATION", "CONFIRMED_BY_PROPRIETOR"
+  depositSlipUrl          String?
+  notes                   String?
+  confirmedByProprietorId String?
+  confirmedAt             DateTime?
+  createdAt               DateTime  @default(now())
+
+  // Relations
+  school                  School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  bursar                  Staff     @relation("BursarHandovers", fields: [bursarId], references: [id], onDelete: Cascade)
+  confirmedByProprietor   Staff?    @relation("ProprietorConfirmations", fields: [confirmedByProprietorId], references: [id], onDelete: SetNull)
+  payments                Payment[]
+}

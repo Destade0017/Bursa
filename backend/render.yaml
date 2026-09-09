@@ -1,0 +1,32 @@
+services:
+  # Express Backend Web Service
+  - type: web
+    name: bursa-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5001
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: bursa-postgres
+          property: connectionString
+      - key: PAYMENT_PROVIDER
+        value: MOCK # Change to PAYSTACK when live secret key is added
+      - key: PAYSTACK_SECRET_KEY
+        sync: false # Set manually in Render dashboard
+      - key: FRONTEND_URL
+        sync: false # Set to your deployed Vercel/Render frontend URL
+
+databases:
+  # Supabase or Render PostgreSQL Database
+  - name: bursa-postgres
+    databaseName: bursar_db
+    user: bursar_admin
+    region: oregon
+    plan: free
