@@ -51,7 +51,7 @@ export default function ReceiptModal({
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs overflow-y-auto print:p-0 print:bg-white animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-xs overflow-y-auto print:p-0 print:bg-white animate-fadeIn">
       {/* Print Specific CSS */}
       <style>{`
         @media print {
@@ -81,7 +81,7 @@ export default function ReceiptModal({
       `}</style>
 
       {/* Modal Wrapper */}
-      <div className="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden my-8 relative print:border-none print:shadow-none print:m-0 print:max-w-none text-slate-900">
+      <div className="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden my-auto max-h-[90vh] overflow-y-auto relative print:border-none print:shadow-none print:m-0 print:max-w-none text-slate-900">
         {/* Action Header Bar (Hidden on Print) */}
         <div className="no-print p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-700">
@@ -150,7 +150,7 @@ export default function ReceiptModal({
           </div>
 
           {/* Student & DVA Metadata Grid */}
-          <div className="grid grid-cols-2 gap-4 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-200/80 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-200/80 text-xs">
             <div>
               <span className="text-slate-500 uppercase text-[10px] font-bold block mb-1">
                 Student Details
