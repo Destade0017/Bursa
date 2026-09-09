@@ -41,7 +41,14 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: allowedOrigins.length > 0 ? allowedOrigins : '*',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl) or any domain in development/production
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Permissive for production deployments
+      }
+    },
     credentials: true
   })
 );
