@@ -1,6 +1,6 @@
 /**
  * Main Server Entry Point
- * Configures Express application middleware, routes, and starts the HTTP server.
+ * Configures Express application middleware, routes, and starts the HTTP servers.
  */
 
 import 'dotenv/config';
