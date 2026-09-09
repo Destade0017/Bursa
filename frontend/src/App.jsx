@@ -56,12 +56,17 @@ export default function App() {
   const { data: schoolsData = [] } = useSchools(token);
 
   const selectedSchool = React.useMemo(() => {
-    if (!schoolsData || schoolsData.length === 0) return null;
     const targetSchoolId = currentUser?.schoolId;
-    return (targetSchoolId && schoolsData.find((s) => s.id === targetSchoolId)) || schoolsData[0];
-  }, [schoolsData, currentUser?.schoolId]);
+    if (targetSchoolId && schoolsData.length > 0) {
+      const matched = schoolsData.find((s) => s.id === targetSchoolId);
+      if (matched) return matched;
+    }
+    // IfcurrentUser has a school object attached directly on login payload, use it
+    if (currentUser?.school) return currentUser.school;
+    return schoolsData.length > 0 ? schoolsData[0] : null;
+  }, [schoolsData, currentUser]);
 
-  const schoolId = selectedSchool?.id;
+  const schoolId = currentUser?.schoolId || selectedSchool?.id;
 
   const {
     data: students = [],
