@@ -193,15 +193,19 @@ export const registerSchool = async (req, res) => {
 
     const cleanEmail = String(email).trim().toLowerCase();
 
-    // 2. Check if staff or school with this email already exists
+    // 2. Check if staff or school with this email already exists (case-insensitive normalized check)
     const [existingStaff, existingSchool] = await Promise.all([
-      prisma.staff.findUnique({ where: { email: cleanEmail } }),
-      prisma.school.findUnique({ where: { email: cleanEmail } })
+      prisma.staff.findFirst({
+        where: { email: { equals: cleanEmail, mode: 'insensitive' } }
+      }),
+      prisma.school.findFirst({
+        where: { email: { equals: cleanEmail, mode: 'insensitive' } }
+      })
     ]);
 
     if (existingStaff || existingSchool) {
       return res.status(400).json({
-        error: 'An account or school with this email already exists. Please log in or use a different email.'
+        error: 'A school is already registered with this official email address.'
       });
     }
 
@@ -274,7 +278,7 @@ export const registerSchool = async (req, res) => {
     });
   } catch (error) {
     if (error.code === 'P2002') {
-      return res.status(400).json({ error: 'A school or account with this contact email already exists.' });
+      return res.status(400).json({ error: 'A school is already registered with this official email address.' });
     }
     return res.status(500).json({ error: 'School registration failed', details: error.message });
   }
