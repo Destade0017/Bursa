@@ -18,7 +18,8 @@ import {
 } from 'lucide-react';
 import { formatNaira, generateWhatsAppReminderUrl } from '../../utils/formatters.js';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const rawApiBase = import.meta.env.VITE_API_URL || '';
+const API_BASE = rawApiBase.endsWith('/') ? rawApiBase.slice(0, -1) : rawApiBase;
 
 export default function StudentLedgerDrawer({
   student,
@@ -80,7 +81,7 @@ export default function StudentLedgerDrawer({
     remainingBalanceNaira: remainingBalanceKobo / 100,
     accountNumber: dva?.accountNumber || 'N/A',
     bankName: dva?.bankName || 'Wema Bank',
-    schoolName: school?.name || 'Radiance Bright Stars Academy'
+    schoolName: school?.name || 'School'
   });
 
   return (

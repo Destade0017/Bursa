@@ -3,7 +3,8 @@ import { X, Loader2, UserPlus, AlertCircle, Info } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useFeeSchedules } from '../../api/queryHooks.js';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const rawApiBase = import.meta.env.VITE_API_URL || '';
+const API_BASE = rawApiBase.endsWith('/') ? rawApiBase.slice(0, -1) : rawApiBase;
 
 function formatNairaFromKobo(kobo) {
   if (!kobo || kobo <= 0) return null;
@@ -16,6 +17,8 @@ function formatNairaFromKobo(kobo) {
 }
 
 export default function AddStudentModal({ schoolId, token, isOpen, onClose, onSuccess, school }) {
+  const targetSchoolId = schoolId || school?.id;
+
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [classGrade, setClassGrade] = useState('JSS 1');
@@ -27,7 +30,7 @@ export default function AddStudentModal({ schoolId, token, isOpen, onClose, onSu
   const qc = useQueryClient();
 
   // Fetch fee schedules to show fee hint for the selected class
-  const { data: feeSchedules = [] } = useFeeSchedules(schoolId, token);
+  const { data: feeSchedules = [] } = useFeeSchedules(targetSchoolId, token);
 
   // Find matching fee schedule for the selected class
   const matchingSchedule = feeSchedules.find(
@@ -38,7 +41,10 @@ export default function AddStudentModal({ schoolId, token, isOpen, onClose, onSu
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!schoolId) return;
+    if (!targetSchoolId) {
+      setError('Active school context not found. Please reload or log in again.');
+      return;
+    }
 
     if (!firstName.trim() || !lastName.trim() || !parentName.trim() || !parentPhone.trim()) {
       setError('Please fill in all required fields.');
@@ -49,14 +55,14 @@ export default function AddStudentModal({ schoolId, token, isOpen, onClose, onSu
     setError(null);
 
     try {
-      const res = await fetch(`${API_BASE}/api/schools/${schoolId}/students`, {
+      const res = await fetch(`${API_BASE}/api/schools/${targetSchoolId}/students`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          schoolId,
+          schoolId: targetSchoolId,
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           classGrade: classGrade.trim(),
@@ -69,8 +75,8 @@ export default function AddStudentModal({ schoolId, token, isOpen, onClose, onSu
 
       if (res.ok) {
         // Invalidate both students and invoices so the roster reflects the new invoice immediately
-        qc.invalidateQueries({ queryKey: ['students', schoolId] });
-        qc.invalidateQueries({ queryKey: ['invoices', schoolId] });
+        qc.invalidateQueries({ queryKey: ['students', targetSchoolId] });
+        qc.invalidateQueries({ queryKey: ['invoices', targetSchoolId] });
 
         onSuccess && onSuccess(data.data);
         onClose();

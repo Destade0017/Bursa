@@ -37,7 +37,7 @@ export default function Header({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="font-bold text-sm text-white leading-none">
-                  {selectedSchool?.name || 'Radiance Bright Stars Academy'}
+                  {selectedSchool?.name || 'School Portal'}
                 </h2>
                 <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">
                   <ShieldCheck className="w-3 h-3 text-emerald-400" />

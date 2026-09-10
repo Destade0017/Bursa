@@ -151,7 +151,7 @@ export default function ReminderConsole({ students, invoices, school }) {
                     remainingBalanceNaira: student.remainingBalanceKobo / 100,
                     accountNumber: dva?.accountNumber || 'N/A',
                     bankName: dva?.bankName || 'Wema Bank',
-                    schoolName: school?.name || 'Radiance Bright Stars Academy'
+                    schoolName: school?.name || 'School'
                   });
 
                   return (

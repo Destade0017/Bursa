@@ -30,7 +30,7 @@ export default function ReceiptModal({
   const remainingBalanceNaira = Math.max(0, totalBilledNaira - amountPaidNaira);
   const isPaid = invoice.status === 'PAID';
 
-  const schoolName = school?.name || 'Crown Heights College';
+  const schoolName = school?.name || 'School';
   const dva = student.virtualAccount;
 
   // Print Handler

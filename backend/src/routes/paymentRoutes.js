@@ -32,5 +32,6 @@ router.get('/invoices/:invoiceId/payments', verifyToken, getInvoicePayments);
 // Suspense Queue Exception Endpoints (Authenticated & Tenant-Isolated)
 router.get('/schools/:schoolId/suspense', verifyToken, verifySchoolAccess, getSuspenseTransactions);
 router.post('/suspense/:id/allocate', verifyToken, allocateSuspenseTransaction);
+router.post('/schools/:schoolId/suspense/allocate', verifyToken, verifySchoolAccess, allocateSuspenseTransaction);
 
 export default router;

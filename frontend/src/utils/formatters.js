@@ -49,7 +49,7 @@ export function generateWhatsAppReminderUrl({
   remainingBalanceNaira,
   accountNumber,
   bankName = 'Wema Bank',
-  schoolName = 'Radiance Bright Stars Academy'
+  schoolName = 'School'
 }) {
   const cleanPhone = cleanNigerianPhone(parentPhone);
   const formattedBalance = formatNaira(remainingBalanceNaira);

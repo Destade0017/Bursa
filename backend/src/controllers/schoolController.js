@@ -85,7 +85,11 @@ export const getSchools = async (req, res) => {
  */
 export const createStudent = async (req, res) => {
   try {
-    const schoolId = req.params.schoolId || req.body.schoolId;
+    let schoolId = req.params.schoolId || req.body.schoolId || req.user?.schoolId;
+    if (schoolId === 'undefined' || schoolId === 'null') {
+      schoolId = req.user?.schoolId;
+    }
+
     const { firstName, lastName, classGrade, parentName, parentPhone } = req.body;
 
     if (!schoolId || !firstName || !lastName || !classGrade || !parentName || !parentPhone) {

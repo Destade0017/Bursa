@@ -33,7 +33,7 @@ export default function StudentTableRow({
     remainingBalanceNaira: Math.max(0, student.totalBilledKobo - student.amountPaidKobo) / 100,
     accountNumber: dva?.accountNumber || 'N/A',
     bankName: dva?.bankName || 'Wema Bank',
-    schoolName: school?.name || 'Crown Heights College'
+    schoolName: school?.name || 'School'
   });
 
   const isLinkCopied = copiedLinkStudentId === student.id;

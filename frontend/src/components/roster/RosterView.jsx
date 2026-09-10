@@ -36,7 +36,7 @@ export default function RosterView({
   const [copiedLinkStudentId, setCopiedLinkStudentId] = useState(null);
 
   const handleCopyParentLink = (student) => {
-    const slug = school?.slug || 'crown-heights';
+    const slug = school?.slug || '';
     const identifier = student.admissionNumber || student.parentPhone;
     const portalUrl = `${window.location.origin}/portal/${slug}?ref=${encodeURIComponent(identifier)}`;
     navigator.clipboard.writeText(portalUrl);

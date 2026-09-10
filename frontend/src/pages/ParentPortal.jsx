@@ -26,11 +26,12 @@ import {
 import { QRCodeSVG } from 'qrcode.react';
 import { formatNaira } from '../utils/formatters.js';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const rawApiBase = import.meta.env.VITE_API_URL || '';
+const API_BASE = rawApiBase.endsWith('/') ? rawApiBase.slice(0, -1) : rawApiBase;
 
 export default function ParentPortal() {
   const { schoolSlug: routeSchoolSlug, slug } = useParams();
-  const schoolSlug = routeSchoolSlug || slug || 'crown-heights';
+  const schoolSlug = routeSchoolSlug || slug || '';
   const navigate = useNavigate();
 
   // Search & Retrieval State
@@ -90,13 +91,19 @@ export default function ParentPortal() {
     setSearchError(null);
 
     try {
-      const res = await fetch(
-        `${API_BASE}/api/public/students/lookup?identifier=${encodeURIComponent(query)}&schoolSlug=${encodeURIComponent(schoolSlug)}`
-      );
+      const res = await fetch(`${API_BASE}/api/public/lookup-student`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          schoolSlug,
+          searchIdentifier: query
+        })
+      });
 
       const data = await res.json();
-      if (res.ok && data.student) {
-        setCurrentStudent(data.student);
+      const matchedStudent = data.primaryStudent || data.student;
+      if (res.ok && matchedStudent) {
+        setCurrentStudent(matchedStudent);
         if (shouldScroll) {
           setTimeout(() => {
             document.getElementById('portal-receipt')?.scrollIntoView({ behavior: 'smooth' });
@@ -173,7 +180,7 @@ export default function ParentPortal() {
             </div>
             <div>
               <h1 className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-tight">
-                {schoolData?.name || 'Crown Heights College'}
+                {schoolData?.name || 'School'}
               </h1>
               <div className="flex items-center gap-2 mt-1">
                 <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[#ECFDF5] text-emerald-800 border border-emerald-200">
@@ -603,7 +610,7 @@ export default function ParentPortal() {
             {/* Receipt Header */}
             <div className="text-center border-b pb-4 space-y-1">
               <h2 className="text-lg font-black text-slate-900 tracking-tight">
-                {schoolData?.name || 'Crown Heights College'}
+                {schoolData?.name || 'School'}
               </h2>
               <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
                 Official School Fee Payment Receipt
@@ -699,7 +706,7 @@ export default function ParentPortal() {
                 Exam Clearance Pass
               </h3>
               <p className="text-xs text-slate-500">
-                {schoolData?.name || 'Crown Heights College'} • {activeInvoice?.term}
+                {schoolData?.name || 'School'} • {activeInvoice?.term}
               </p>
             </div>
 

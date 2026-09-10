@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Building2,
   Wallet,
@@ -23,24 +23,29 @@ import {
   Smartphone,
   LogOut,
   Shield,
-  Trash2
+  Trash2,
+  Loader2
 } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const rawApiBase = import.meta.env.VITE_API_URL || '';
+const API_BASE = rawApiBase.endsWith('/') ? rawApiBase.slice(0, -1) : rawApiBase;
 
 export default function SettlementSettings({ school, user, onRefresh }) {
   // Navigation State
   const [activeSection, setActiveSection] = useState('general');
 
   // General Settings State
-  const [schoolName, setSchoolName] = useState(school?.name || 'Radiance Bright Stars Academy');
-  const [schoolEmail, setSchoolEmail] = useState(school?.email || 'admin@radianceacademy.edu.ng');
+  const [schoolName, setSchoolName] = useState(school?.name || '');
+  const [schoolEmail, setSchoolEmail] = useState(school?.email || '');
   const [schoolPhone, setSchoolPhone] = useState(school?.phone || '08034567890');
   const [schoolAddress, setSchoolAddress] = useState(
     school?.address || '15 Education Avenue, Victoria Island, Lagos'
   );
   const [academicSession, setAcademicSession] = useState('2026/2027');
   const [currentTerm, setCurrentTerm] = useState('First Term');
+  const [logoUrl, setLogoUrl] = useState(school?.logoUrl || null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Finance & Settlement State
   const [currency] = useState('NGN (₦)');
@@ -52,7 +57,7 @@ export default function SettlementSettings({ school, user, onRefresh }) {
   const [bankName, setBankName] = useState('Wema Bank PLC');
   const [accountNumber, setAccountNumber] = useState('0123456789');
   const [accountName, setAccountName] = useState(
-    school?.name ? `${school.name} Operating Account` : 'Radiance Bright Stars Operating Account'
+    school?.name ? `${school.name} Operating Account` : ''
   );
 
   // Notification Toggles State
@@ -112,9 +117,74 @@ export default function SettlementSettings({ school, user, onRefresh }) {
         if (s.paymentRefFormat) setPaymentRefFormat(s.paymentRefFormat);
         if (s.receiptPrefix) setReceiptPrefix(s.receiptPrefix);
         if (s.receiptFooter) setReceiptFooter(s.receiptFooter);
+        if (s.logoUrl !== undefined) setLogoUrl(s.logoUrl);
       }
     } catch (err) {
       console.error('Failed to fetch school details:', err);
+    }
+  };
+
+  const handleLogoSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !school?.id) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      triggerSaveNotification('Logo image size exceeds 2MB limit.');
+      return;
+    }
+
+    try {
+      setUploadingLogo(true);
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64Logo = reader.result;
+        const token = localStorage.getItem('bursar_token');
+        const res = await fetch(`${API_BASE}/api/schools/${school.id}/logo`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ logo: base64Logo })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setLogoUrl(data.logoUrl || data.data?.logoUrl);
+          triggerSaveNotification('School logo uploaded successfully!');
+          if (onRefresh) onRefresh();
+        } else {
+          triggerSaveNotification(data.message || data.error || 'Failed to upload logo.');
+        }
+        setUploadingLogo(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('Logo upload error:', err);
+      triggerSaveNotification('Network error uploading school logo.');
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleDeleteLogo = async () => {
+    if (!school?.id) return;
+    try {
+      setUploadingLogo(true);
+      const token = localStorage.getItem('bursar_token');
+      const res = await fetch(`${API_BASE}/api/schools/${school.id}/logo`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setLogoUrl(null);
+        triggerSaveNotification('School logo removed successfully.');
+        if (onRefresh) onRefresh();
+      } else {
+        triggerSaveNotification('Failed to remove school logo.');
+      }
+    } catch (err) {
+      console.error('Error removing logo:', err);
+    } finally {
+      setUploadingLogo(false);
     }
   };
 
@@ -434,20 +504,53 @@ export default function SettlementSettings({ school, user, onRefresh }) {
 
                 {/* Logo Upload Avatar */}
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-[#ECFDF5] border border-emerald-200 flex items-center justify-center text-[#10B981] font-black text-lg shadow-2xs">
-                    {schoolName.slice(0, 2).toUpperCase()}
-                  </div>
-                  <div>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleLogoSelect}
+                    accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp"
+                    className="hidden"
+                  />
+                  {logoUrl ? (
+                    <img
+                      src={logoUrl}
+                      alt="School Logo"
+                      className="w-14 h-14 rounded-2xl object-cover border border-emerald-200 shadow-2xs"
+                    />
+                  ) : (
+                    <div className="w-14 h-14 rounded-2xl bg-[#ECFDF5] border border-emerald-200 flex items-center justify-center text-[#10B981] font-black text-lg shadow-2xs">
+                      {schoolName ? schoolName.slice(0, 2).toUpperCase() : 'SCH'}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
+                      disabled={uploadingLogo}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer inline-flex items-center gap-1.5 shadow-2xs disabled:opacity-60"
                     >
-                      <Upload className="w-3.5 h-3.5 text-slate-500" />
-                      <span>Upload Logo</span>
+                      {uploadingLogo ? (
+                        <Loader2 className="w-3.5 h-3.5 text-slate-500 animate-spin" />
+                      ) : (
+                        <Upload className="w-3.5 h-3.5 text-slate-500" />
+                      )}
+                      <span>{uploadingLogo ? 'Uploading...' : 'Upload Logo'}</span>
                     </button>
-                    <p className="text-[11px] text-slate-400 mt-1">PNG, JPG or SVG. Max size 2MB.</p>
+
+                    {logoUrl && (
+                      <button
+                        type="button"
+                        disabled={uploadingLogo}
+                        onClick={handleDeleteLogo}
+                        className="px-3.5 py-1.5 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition cursor-pointer inline-flex items-center gap-1.5 shadow-2xs disabled:opacity-60"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                        <span>Remove</span>
+                      </button>
+                    )}
                   </div>
                 </div>
+                <p className="text-[11px] text-slate-400 -mt-2">PNG, JPG, WEBP or SVG. Max size 2MB.</p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>

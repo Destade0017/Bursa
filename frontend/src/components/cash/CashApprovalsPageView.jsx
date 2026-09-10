@@ -10,7 +10,8 @@ import {
 import { formatNaira } from '../../utils/formatters.js';
 import ProprietorCashApprovals from './ProprietorCashApprovals.jsx';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const rawApiBase = import.meta.env.VITE_API_URL || '';
+const API_BASE = rawApiBase.endsWith('/') ? rawApiBase.slice(0, -1) : rawApiBase;
 
 export default function CashApprovalsPageView({ school, currentUser, onRefresh }) {
   const [handovers, setHandovers] = useState([]);
@@ -21,14 +22,14 @@ export default function CashApprovalsPageView({ school, currentUser, onRefresh }
     try {
       setLoading(true);
       const token = localStorage.getItem('bursar_token');
-      const res = await fetch(`${API_BASE}/api/cash/handovers?schoolId=${school.id}`, {
+      const res = await fetch(`${API_BASE}/api/schools/${school.id}/cash-drawer/handovers`, {
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         }
       });
       const data = await res.json();
-      if (data.data) {
-        setHandovers(data.data);
+      if (res.ok) {
+        setHandovers(data.handovers || data.data || []);
       }
     } catch (err) {
       console.error('Error fetching cash handovers:', err);

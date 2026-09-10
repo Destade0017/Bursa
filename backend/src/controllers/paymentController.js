@@ -214,11 +214,11 @@ export const getSuspenseTransactions = async (req, res) => {
  */
 export const allocateSuspenseTransaction = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { studentId } = req.body;
+    const id = req.params.id || req.body.suspenseId;
+    const studentId = req.body.studentId || req.body.targetStudentId;
 
-    if (!studentId) {
-      return res.status(400).json({ error: 'studentId is required for manual allocation.' });
+    if (!id || !studentId) {
+      return res.status(400).json({ error: 'Both suspense transaction ID and target studentId are required for manual allocation.' });
     }
 
     const suspenseItem = await prisma.suspenseTransaction.findUnique({

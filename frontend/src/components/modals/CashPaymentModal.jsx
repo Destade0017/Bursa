@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { X, CheckCircle2, AlertCircle, RefreshCw, Receipt } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const rawApiBase = import.meta.env.VITE_API_URL || '';
+const API_BASE = rawApiBase.endsWith('/') ? rawApiBase.slice(0, -1) : rawApiBase;
 
 export default function CashPaymentModal({
   students = [],
@@ -41,7 +42,7 @@ export default function CashPaymentModal({
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
-          schoolId: school?.id || 'crown-heights',
+          schoolId: school?.id,
           studentId: selectedStudentId,
           amountKobo,
           paperReceiptNumber: receiptNumber,

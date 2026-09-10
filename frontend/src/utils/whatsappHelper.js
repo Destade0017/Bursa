@@ -28,7 +28,7 @@ export const cleanNigerianPhone = (phone) => {
  * Generates a pre-filled WhatsApp URL for payment receipts
  */
 export const generateWhatsAppReceiptUrl = ({
-  schoolName = 'Crown Heights International Academy',
+  schoolName = 'School',
   parentPhone,
   parentName,
   studentName,

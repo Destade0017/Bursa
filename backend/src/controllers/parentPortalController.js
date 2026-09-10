@@ -139,7 +139,8 @@ export const lookupStudent = async (req, res) => {
       });
     }
 
-    const { schoolSlug, searchIdentifier } = req.body;
+    const schoolSlug = req.body?.schoolSlug || req.query?.schoolSlug;
+    const searchIdentifier = req.body?.searchIdentifier || req.query?.identifier || req.query?.searchIdentifier;
 
     if (!schoolSlug || !searchIdentifier) {
       return res.status(400).json({

@@ -12,7 +12,8 @@ import {
 } from 'lucide-react';
 import { formatNaira } from '../../utils/formatters.js';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const rawApiBase = import.meta.env.VITE_API_URL || '';
+const API_BASE = rawApiBase.endsWith('/') ? rawApiBase.slice(0, -1) : rawApiBase;
 
 export default function SuspenseQueueView({
   suspenseItems = [],
@@ -58,15 +59,14 @@ export default function SuspenseQueueView({
 
     try {
       const token = localStorage.getItem('bursar_token');
-      const res = await fetch(`${API_BASE}/api/schools/${school?.id || 'crown-heights'}/suspense/allocate`, {
+      const res = await fetch(`${API_BASE}/api/suspense/${selectedTx.id}/allocate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
-          suspenseId: selectedTx.id,
-          targetStudentId
+          studentId: targetStudentId
         })
       });
 

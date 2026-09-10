@@ -31,7 +31,7 @@ export default function Sidebar({
   onClose,
   onLogout
 }) {
-  const schoolName = school?.name || currentUser?.schoolName || 'Crown Heights College';
+  const schoolName = school?.name || currentUser?.schoolName || 'School Portal';
   const userFullName = currentUser?.fullName || 'Administrator';
   const userRole = 'Primary Account';
 

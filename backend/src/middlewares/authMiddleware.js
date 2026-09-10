@@ -107,8 +107,10 @@ export const requireRole = (allowedRoles) => {
  */
 export const verifySchoolAccess = (req, res, next) => {
   try {
-    const targetSchoolId = req.params.schoolId || req.body?.schoolId || req.query?.schoolId;
-    if (!targetSchoolId) return next();
+    let targetSchoolId = req.params.schoolId || req.body?.schoolId || req.query?.schoolId;
+    if (targetSchoolId === 'undefined' || targetSchoolId === 'null') {
+      targetSchoolId = null;
+    }
 
     // Authenticated session required for school-scoped endpoints
     if (!req.user || !req.user.schoolId) {
@@ -118,7 +120,9 @@ export const verifySchoolAccess = (req, res, next) => {
       });
     }
 
-    // Strict multi-tenant isolation: req.user.schoolId === req.params.schoolId
+    if (!targetSchoolId) return next();
+
+    // Strict multi-tenant isolation: req.user.schoolId === targetSchoolId
     if (req.user.schoolId !== targetSchoolId) {
       return res.status(403).json({
         error: 'Forbidden',

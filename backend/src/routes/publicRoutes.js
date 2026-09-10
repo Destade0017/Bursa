@@ -16,5 +16,7 @@ router.get('/schools/:slug', getPublicSchoolDetails);
 
 // Look up student by admission number or parent phone
 router.post('/lookup-student', lookupStudent);
+router.all('/lookup-student', lookupStudent);
+router.all('/students/lookup', lookupStudent);
 
 export default router;

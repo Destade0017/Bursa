@@ -608,7 +608,7 @@ export default function App() {
 
       {isAddStudentModalOpen && (
         <AddStudentModal
-          schoolId={selectedSchool?.id}
+          schoolId={schoolId || selectedSchool?.id}
           school={selectedSchool}
           token={token}
           isOpen={isAddStudentModalOpen}

@@ -33,5 +33,6 @@ router.post(
 
 // 4. Audit Trail & Handover History
 router.get('/:schoolId/cash-drawer/handovers', verifySchoolAccess, getSchoolHandovers);
+router.get('/handovers', verifySchoolAccess, getSchoolHandovers);
 
 export default router;
