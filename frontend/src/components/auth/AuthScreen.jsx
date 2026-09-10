@@ -634,7 +634,7 @@ export default function AuthScreen({ onLoginSuccess }) {
           <div className="pt-4 border-t border-slate-100 text-center text-xs text-slate-500">
             Need assistance or onboarding support?{' '}
             <a
-              href="mailto:support@bursa.ng"
+              href="mailto:destade45@gmail.com"
               className="text-blue-600 hover:text-blue-700 font-semibold hover:underline"
             >
               Contact BURSA Support

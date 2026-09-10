@@ -33,7 +33,7 @@ export default function Sidebar({
 }) {
   const schoolName = school?.name || currentUser?.schoolName || 'Crown Heights College';
   const userFullName = currentUser?.fullName || 'Administrator';
-  const userRole = currentUser?.role === 'PROPRIETOR' ? 'School Proprietor' : 'Head Bursar';
+  const userRole = 'Primary Account';
 
   const initials = getUserInitials(currentUser);
 

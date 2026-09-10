@@ -334,7 +334,6 @@ export default function SettlementSettings({ school, user, onRefresh }) {
   const navItems = [
     { id: 'general', label: 'General', icon: Building2 },
     { id: 'finance', label: 'Finance', icon: Wallet },
-    { id: 'users', label: 'Users & Roles', icon: Users },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'security', label: 'Security', icon: ShieldCheck }
   ];
@@ -396,6 +395,35 @@ export default function SettlementSettings({ school, user, onRefresh }) {
               <div>
                 <h3 className="text-lg font-black text-slate-900 tracking-tight">General</h3>
                 <p className="text-xs text-slate-500 mt-0.5">Manage your school and account information.</p>
+              </div>
+
+              {/* Account Card */}
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 shadow-2xs space-y-5">
+                <div className="text-xs font-extrabold text-slate-900 border-b border-slate-100 pb-3 uppercase tracking-wider">
+                  Account Details
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Profile Name</label>
+                    <input
+                      type="text"
+                      value={user?.fullName || 'School Administrator'}
+                      disabled
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 font-medium opacity-80 cursor-not-allowed"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Email Address</label>
+                    <input
+                      type="email"
+                      value={user?.email || 'admin@school.edu.ng'}
+                      disabled
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 font-medium opacity-80 cursor-not-allowed"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* School Profile Card */}

@@ -13,7 +13,7 @@ export default function AppHeader({
 }) {
   const schoolName = selectedSchool?.name || currentUser?.schoolName || currentUser?.school?.name || 'School Portal';
   const fullName = currentUser?.fullName || 'Administrator';
-  const roleName = currentUser?.role === 'PROPRIETOR' ? 'Proprietor' : 'Head Bursar';
+  const roleName = 'Primary Account';
 
   // Compute clean initials for avatar (e.g. "EO" for Emmanuel Okon, skipping "Mr.")
   const initials = getUserInitials(currentUser);
