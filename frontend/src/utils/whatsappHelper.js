@@ -45,9 +45,7 @@ export const generateWhatsAppReceiptUrl = ({
   const formattedTotalBilled = Number(totalBilledNaira || 0).toLocaleString();
   const formattedBalance = Number(remainingBalanceNaira || 0).toLocaleString();
 
-  const statusEmoji = status === 'PAID' ? '✅' : '⏳';
-
-  const message = `🧾 *OFFICIAL PAYMENT RECEIPT - ${schoolName.toUpperCase()}*
+  const message = `*OFFICIAL PAYMENT RECEIPT - ${schoolName.toUpperCase()}*
 
 Dear *${parentName || 'Parent'}*,
 
@@ -56,8 +54,9 @@ We have confirmed receipt of your payment for *${studentName}* (${classGrade}).
 • *Amount Paid:* ₦${formattedAmountPaid}
 • *Total Billed:* ₦${formattedTotalBilled}
 • *Remaining Balance:* ₦${formattedBalance}
-• *Status:* ${statusEmoji} ${status.replace('_', ' ')}
+• *Status:* ${status.replace('_', ' ')}
 • *Reference ID:* ${transactionRef}
+• *Issued On:* ${new Date().toLocaleDateString('en-NG', { dateStyle: 'long' })}
 
 Thank you for your prompt partnership and support!
 

@@ -470,7 +470,7 @@ export default function AuthScreen({ onLoginSuccess }) {
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-medium transition cursor-pointer shadow-2xs"
                     title="Populate credentials for Head Bursar"
                   >
-                    <span>👤 Head Bursar</span>
+                    <span>Head Bursar</span>
                   </button>
 
                   <button
@@ -480,7 +480,7 @@ export default function AuthScreen({ onLoginSuccess }) {
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-medium transition cursor-pointer shadow-2xs"
                     title="Populate credentials for School Proprietor"
                   >
-                    <span>👑 School Proprietor</span>
+                    <span>School Proprietor</span>
                   </button>
                 </div>
               </div>

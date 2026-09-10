@@ -125,7 +125,7 @@ export default function ParentPortal() {
           const data = await res.json();
           if (data.status && data.status !== activeInvoice.status) {
             // Updated payment detected!
-            setToastMessage('🎉 Bank transfer confirmed! Student balance updated in real-time.');
+            setToastMessage('Bank transfer confirmed. Account balance updated in real-time.');
             setTimeout(() => setToastMessage(null), 5000);
             handleLookup(searchIdentifier, false);
           }
@@ -475,9 +475,8 @@ export default function ParentPortal() {
                     </div>
                   </div>
 
-                  {/* Instructional Text */}
                   <p className="text-xs text-slate-500 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200/80">
-                    💡 Transfer directly from any mobile banking app (OPay, GTBank, Zenith, Kuda, PalmPay, etc.). Your balance updates automatically within seconds.
+                    Transfer directly from any mobile banking app or internet banking portal. Account balances update automatically upon payment reconciliation.
                   </p>
                 </div>
               ) : (

@@ -723,7 +723,7 @@ export default function DashboardOverview({
                           isMatched ? 'text-emerald-800' : 'text-amber-900'
                         }`}
                       >
-                        {isMatched ? '✓ Payment matched' : '⚠ Payment requires review'}
+                        {isMatched ? 'Payment matched' : 'Payment requires review'}
                       </span>
                       <span className="text-slate-300">•</span>
                       <span className="text-xs font-black text-slate-900">

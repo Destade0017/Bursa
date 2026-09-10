@@ -57,13 +57,13 @@ export function generateWhatsAppReminderUrl({
   const message =
     `*OFFICIAL SCHOOL FEE REMINDER - ${schoolName.toUpperCase()}*\n\n` +
     `Dear ${parentName},\n` +
-    `This is a polite reminder regarding the outstanding First Term fee balance for *${studentName}* (${classGrade}).\n\n` +
-    `📌 *Outstanding Balance:* ${formattedBalance}\n\n` +
-    `You can pay conveniently via direct bank transfer to ${studentName}'s Dedicated Virtual Account:\n` +
-    `🏦 *Bank:* ${bankName}\n` +
-    `🔢 *Account Number:* ${accountNumber}\n` +
-    `👤 *Account Name:* ${schoolName} / ${studentName}\n\n` +
-    `Thank you for your prompt cooperation as we work together for ${studentName}'s academic excellence.\n\n` +
+    `This is a formal reminder regarding the outstanding First Term fee balance for *${studentName}* (${classGrade}).\n\n` +
+    `*Outstanding Balance:* ${formattedBalance}\n\n` +
+    `You may settle this fee via direct bank transfer to the student's Dedicated Virtual Account details below:\n` +
+    `*Bank:* ${bankName}\n` +
+    `*Account Number:* ${accountNumber}\n` +
+    `*Account Name:* ${schoolName} / ${studentName}\n\n` +
+    `Thank you for your prompt attention to this financial requirement.\n\n` +
     `*Bursar's Office*\n${schoolName}`;
 
   return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
