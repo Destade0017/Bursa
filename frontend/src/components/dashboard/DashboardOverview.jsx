@@ -81,15 +81,7 @@ export default function DashboardOverview({
 
     const list = Object.values(map);
     if (list.length === 0) {
-      // Provide clean default representation for the dashboard
-      return [
-        { name: 'JSS 1', rate: 94, totalBilledKobo: 250000000, totalPaidKobo: 235000000 },
-        { name: 'JSS 2', rate: 88, totalBilledKobo: 220000000, totalPaidKobo: 193600000 },
-        { name: 'JSS 3', rate: 91, totalBilledKobo: 240000000, totalPaidKobo: 218400000 },
-        { name: 'SSS 1', rate: 76, totalBilledKobo: 280000000, totalPaidKobo: 212800000 },
-        { name: 'SSS 2', rate: 82, totalBilledKobo: 260000000, totalPaidKobo: 213200000 },
-        { name: 'SSS 3', rate: 95, totalBilledKobo: 300000000, totalPaidKobo: 285000000 }
-      ];
+      return [];
     }
 
     return list
@@ -102,56 +94,21 @@ export default function DashboardOverview({
 
   // Recent Automated Reconciliation Activity
   const reconciliationEvents = useMemo(() => {
-    // If there are real suspense items, include the latest one
     const list = [];
-
     if (suspenseItems.length > 0) {
-      const topSuspense = suspenseItems[0];
-      list.push({
-        id: `suspense-${topSuspense.id}`,
-        status: 'review',
-        title: 'Payment requires review',
-        amountKobo: topSuspense.amountKobo || 12000000,
-        subtext: topSuspense.payerName || topSuspense.depositorName || 'Unknown payer',
-        detail: topSuspense.bankName ? `Direct transfer to ${topSuspense.bankName}` : 'Unmatched Direct Deposit',
-        time: '14 minutes ago',
-        actionLabel: 'Resolve in Queue'
-      });
-    } else {
-      list.push({
-        id: 'mock-review',
-        status: 'review',
-        title: 'Payment requires review',
-        amountKobo: 12000000,
-        subtext: 'Unknown payer • Ref: 994821',
-        detail: 'Direct transfer to school bank account • Needs matching',
-        time: '14 minutes ago',
-        actionLabel: 'Review Exception'
+      suspenseItems.forEach((topSuspense) => {
+        list.push({
+          id: `suspense-${topSuspense.id}`,
+          status: 'review',
+          title: 'Payment requires review',
+          amountKobo: topSuspense.amountKobo || 0,
+          subtext: topSuspense.senderName || topSuspense.attemptedAccountNumber || 'Unknown payer',
+          detail: topSuspense.reason === 'UNRECOGNIZED_ACCOUNT' ? 'Unrecognized DVA / Bank Deposit' : 'No Open Invoice Found',
+          time: topSuspense.createdAt ? new Date(topSuspense.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently',
+          actionLabel: 'Resolve in Queue'
+        });
       });
     }
-
-    // Add recent matched events
-    list.unshift(
-      {
-        id: 'match-1',
-        status: 'matched',
-        title: 'Payment matched',
-        amountKobo: 15000000,
-        subtext: 'David Adeyemi • JSS 2',
-        detail: 'Wema Dedicated Virtual Account • Auto-credited to Tuition',
-        time: '2 minutes ago'
-      },
-      {
-        id: 'match-2',
-        status: 'matched',
-        title: 'Payment matched',
-        amountKobo: 8500000,
-        subtext: 'Sarah Johnson • Primary 5',
-        detail: 'Wema Dedicated Virtual Account • Auto-credited to Term Fees',
-        time: '8 minutes ago'
-      }
-    );
-
     return list;
   }, [suspenseItems]);
 
@@ -173,59 +130,13 @@ export default function DashboardOverview({
             grade: student.classGrade || 'General',
             amountKobo: inv.amountPaidKobo,
             method: 'Dedicated Virtual Account',
-            date: 'Today, 11:24 AM',
+            date: inv.createdAt ? new Date(inv.createdAt).toLocaleDateString() : 'Recent',
             status: inv.status === 'PAID' ? 'RECONCILED' : 'PENDING'
           });
         }
       });
 
-    // If fewer than 4, fill with realistic recent payment records
-    if (list.length < 4) {
-      list.push(
-        {
-          id: 'demo-1',
-          studentName: 'David Adeyemi',
-          parentName: 'Engr. T. Adeyemi',
-          grade: 'JSS 2A',
-          amountKobo: 15000000,
-          method: 'Bank Transfer (Wema DVA)',
-          date: 'Today, 11:42 AM',
-          status: 'RECONCILED'
-        },
-        {
-          id: 'demo-2',
-          studentName: 'Sarah Johnson',
-          parentName: 'Dr. (Mrs) Johnson',
-          grade: 'Primary 5B',
-          amountKobo: 8500000,
-          method: 'Bank Transfer (Wema DVA)',
-          date: 'Today, 11:36 AM',
-          status: 'RECONCILED'
-        },
-        {
-          id: 'demo-3',
-          studentName: 'Emmanuel Chukwu',
-          parentName: 'Chief B. Chukwu',
-          grade: 'SSS 1C',
-          amountKobo: 6500000,
-          method: 'Bursar Counter (Cash Register)',
-          date: 'Today, 10:15 AM',
-          status: 'PENDING'
-        },
-        {
-          id: 'demo-4',
-          studentName: 'Amina Bello',
-          parentName: 'Alhaji M. Bello',
-          grade: 'JSS 3B',
-          amountKobo: 12000000,
-          method: 'Direct Bank Deposit',
-          date: 'Today, 09:50 AM',
-          status: 'UNMATCHED'
-        }
-      );
-    }
-
-    return list.slice(0, 5);
+    return list;
   }, [invoices, students]);
 
   return (
@@ -513,7 +424,7 @@ export default function DashboardOverview({
 
                 {/* Target Line (Dashed Blue) */}
                 <path
-                  d="M 0 140 L 100 115 L 200 90 L 300 65 L 400 45 L 500 25"
+                  d={totalBilledKobo > 0 ? "M 0 140 L 100 115 L 200 90 L 300 65 L 400 45 L 500 25" : "M 0 165 L 500 165"}
                   fill="none"
                   stroke="#3B82F6"
                   strokeWidth="2"
@@ -522,14 +433,16 @@ export default function DashboardOverview({
                 />
 
                 {/* Area Gradient under actual line */}
-                <path
-                  d="M 0 165 L 0 155 L 100 135 L 200 110 L 300 80 L 400 50 L 500 35 L 500 165 Z"
-                  fill="url(#emeraldGradient)"
-                />
+                {totalCollectedKobo > 0 && (
+                  <path
+                    d="M 0 165 L 0 155 L 100 135 L 200 110 L 300 80 L 400 50 L 500 35 L 500 165 Z"
+                    fill="url(#emeraldGradient)"
+                  />
+                )}
 
                 {/* Actual Collection Line (Solid Emerald Green) */}
                 <path
-                  d="M 0 155 L 100 135 L 200 110 L 300 80 L 400 50 L 500 35"
+                  d={totalCollectedKobo > 0 ? "M 0 155 L 100 135 L 200 110 L 300 80 L 400 50 L 500 35" : "M 0 165 L 500 165"}
                   fill="none"
                   stroke="#10B981"
                   strokeWidth="3"
@@ -538,11 +451,15 @@ export default function DashboardOverview({
                 />
 
                 {/* Key Plot Points */}
-                <circle cx="100" cy="135" r="4" fill="#FFFFFF" stroke="#10B981" strokeWidth="2.5" />
-                <circle cx="200" cy="110" r="4" fill="#FFFFFF" stroke="#10B981" strokeWidth="2.5" />
-                <circle cx="300" cy="80" r="4" fill="#FFFFFF" stroke="#10B981" strokeWidth="2.5" />
-                <circle cx="400" cy="50" r="4" fill="#FFFFFF" stroke="#10B981" strokeWidth="2.5" />
-                <circle cx="500" cy="35" r="5" fill="#10B981" stroke="#FFFFFF" strokeWidth="2" />
+                {totalCollectedKobo > 0 && (
+                  <>
+                    <circle cx="100" cy="135" r="4" fill="#FFFFFF" stroke="#10B981" strokeWidth="2.5" />
+                    <circle cx="200" cy="110" r="4" fill="#FFFFFF" stroke="#10B981" strokeWidth="2.5" />
+                    <circle cx="300" cy="80" r="4" fill="#FFFFFF" stroke="#10B981" strokeWidth="2.5" />
+                    <circle cx="400" cy="50" r="4" fill="#FFFFFF" stroke="#10B981" strokeWidth="2.5" />
+                    <circle cx="500" cy="35" r="5" fill="#10B981" stroke="#FFFFFF" strokeWidth="2" />
+                  </>
+                )}
               </svg>
             </div>
 
@@ -646,11 +563,21 @@ export default function DashboardOverview({
           <div className="pt-3 border-t border-slate-100">
             <div className="flex items-center justify-between text-xs mb-1.5">
               <span className="text-slate-500 font-medium">Automated DVA Matching Rate</span>
-              <span className="text-emerald-700 font-bold">98.5% Matched</span>
+              <span className="text-emerald-700 font-bold">
+                {suspenseItems.length === 0 ? '100% Reconciled' : `${Math.round(Math.max(0, 100 - (suspenseItems.length * 10)))}% Matched`}
+              </span>
             </div>
             <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden flex">
-              <div className="bg-[#10B981] h-full" style={{ width: '98.5%' }} />
-              <div className="bg-[#F59E0B] h-full" style={{ width: '1.5%' }} />
+              <div
+                className="bg-[#10B981] h-full transition-all duration-500"
+                style={{ width: `${suspenseItems.length === 0 ? 100 : Math.max(10, 100 - (suspenseItems.length * 10))}%` }}
+              />
+              {suspenseItems.length > 0 && (
+                <div
+                  className="bg-[#F59E0B] h-full transition-all duration-500"
+                  style={{ width: `${Math.min(90, suspenseItems.length * 10)}%` }}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -689,83 +616,93 @@ export default function DashboardOverview({
 
         {/* Live Reconciliation Activity Stream */}
         <div className="mt-5 space-y-3">
-          {reconciliationEvents.map((evt) => {
-            const isMatched = evt.status === 'matched';
+          {reconciliationEvents.length === 0 ? (
+            <div className="p-8 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+              <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-[#10B981] opacity-80" />
+              <p className="text-xs font-bold text-slate-700">Reconciliation Stream Clean</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                No pending suspense transactions. Direct bank transfers will appear here in real time.
+              </p>
+            </div>
+          ) : (
+            reconciliationEvents.map((evt) => {
+              const isMatched = evt.status === 'matched';
 
-            return (
-              <div
-                key={evt.id}
-                className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${
-                  isMatched
-                    ? 'bg-white border-slate-200 hover:border-emerald-300 hover:bg-[#ECFDF5]/20'
-                    : 'bg-amber-50/60 border-amber-200 hover:bg-amber-50'
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
-                      isMatched
-                        ? 'bg-[#ECFDF5] text-[#10B981] border border-emerald-200'
-                        : 'bg-amber-100 text-amber-700 border border-amber-200'
-                    }`}
-                  >
-                    {isMatched ? (
-                      <Check className="w-5 h-5 stroke-[2.5]" />
-                    ) : (
-                      <AlertCircle className="w-5 h-5 stroke-[2.5]" />
+              return (
+                <div
+                  key={evt.id}
+                  className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${
+                    isMatched
+                      ? 'bg-white border-slate-200 hover:border-emerald-300 hover:bg-[#ECFDF5]/20'
+                      : 'bg-amber-50/60 border-amber-200 hover:bg-amber-50'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                        isMatched
+                          ? 'bg-[#ECFDF5] text-[#10B981] border border-emerald-200'
+                          : 'bg-amber-100 text-amber-700 border border-amber-200'
+                      }`}
+                    >
+                      {isMatched ? (
+                        <Check className="w-5 h-5 stroke-[2.5]" />
+                      ) : (
+                        <AlertCircle className="w-5 h-5 stroke-[2.5]" />
+                      )}
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-xs font-bold ${
+                            isMatched ? 'text-emerald-800' : 'text-amber-900'
+                          }`}
+                        >
+                          {isMatched ? 'Payment matched' : 'Payment requires review'}
+                        </span>
+                        <span className="text-slate-300">•</span>
+                        <span className="text-xs font-black text-slate-900">
+                          {formatNaira(evt.amountKobo, true)}
+                        </span>
+                      </div>
+
+                      <div className="text-xs font-semibold text-slate-800 mt-0.5">
+                        {evt.subtext}
+                      </div>
+
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        {evt.detail}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                    <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-slate-400" />
+                      {evt.time}
+                    </span>
+
+                    {!isMatched && (
+                      <button
+                        type="button"
+                        onClick={() => onNavigateTab('suspense')}
+                        className="text-xs font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 px-3 py-1 rounded-lg transition cursor-pointer"
+                      >
+                        {evt.actionLabel}
+                      </button>
+                    )}
+
+                    {isMatched && (
+                      <span className="text-[10px] font-bold text-emerald-700 bg-[#ECFDF5] border border-emerald-200 px-2 py-0.5 rounded-md">
+                        Auto-Posted
+                      </span>
                     )}
                   </div>
-
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`text-xs font-bold ${
-                          isMatched ? 'text-emerald-800' : 'text-amber-900'
-                        }`}
-                      >
-                        {isMatched ? 'Payment matched' : 'Payment requires review'}
-                      </span>
-                      <span className="text-slate-300">•</span>
-                      <span className="text-xs font-black text-slate-900">
-                        {formatNaira(evt.amountKobo, true)}
-                      </span>
-                    </div>
-
-                    <div className="text-xs font-semibold text-slate-800 mt-0.5">
-                      {evt.subtext}
-                    </div>
-
-                    <p className="text-[11px] text-slate-500 mt-0.5">
-                      {evt.detail}
-                    </p>
-                  </div>
                 </div>
-
-                <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
-                  <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-slate-400" />
-                    {evt.time}
-                  </span>
-
-                  {!isMatched && (
-                    <button
-                      type="button"
-                      onClick={() => onNavigateTab('suspense')}
-                      className="text-xs font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 px-3 py-1 rounded-lg transition cursor-pointer"
-                    >
-                      {evt.actionLabel}
-                    </button>
-                  )}
-
-                  {isMatched && (
-                    <span className="text-[10px] font-bold text-emerald-700 bg-[#ECFDF5] border border-emerald-200 px-2 py-0.5 rounded-md">
-                      Auto-Posted
-                    </span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
 
         {/* Footer Link to Full Suspense Queue */}
@@ -809,58 +746,68 @@ export default function DashboardOverview({
 
             {/* Payments Table */}
             <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-slate-100 text-slate-400 uppercase text-[10px] font-bold tracking-wider">
-                    <th className="pb-3 font-bold">Student / Parent</th>
-                    <th className="pb-3 font-bold">Amount</th>
-                    <th className="pb-3 font-bold hidden sm:table-cell">Channel / Method</th>
-                    <th className="pb-3 font-bold hidden md:table-cell">Date</th>
-                    <th className="pb-3 font-bold text-right">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {recentPayments.map((pmt) => {
-                    let badgeClass = 'bg-[#ECFDF5] text-[#059669] border-emerald-200';
-                    let label = 'Reconciled';
+              {recentPayments.length === 0 ? (
+                <div className="py-10 text-center text-slate-400">
+                  <Receipt className="w-8 h-8 mx-auto mb-2 stroke-1 opacity-60" />
+                  <p className="text-xs font-medium text-slate-600">No payment activity recorded yet.</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    Payments received via DVA bank transfer or counter cash will appear here.
+                  </p>
+                </div>
+              ) : (
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-100 text-slate-400 uppercase text-[10px] font-bold tracking-wider">
+                      <th className="pb-3 font-bold">Student / Parent</th>
+                      <th className="pb-3 font-bold">Amount</th>
+                      <th className="pb-3 font-bold hidden sm:table-cell">Channel / Method</th>
+                      <th className="pb-3 font-bold hidden md:table-cell">Date</th>
+                      <th className="pb-3 font-bold text-right">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {recentPayments.map((pmt) => {
+                      let badgeClass = 'bg-[#ECFDF5] text-[#059669] border-emerald-200';
+                      let label = 'Reconciled';
 
-                    if (pmt.status === 'PENDING') {
-                      badgeClass = 'bg-[#FEF3C7] text-[#D97706] border-amber-200';
-                      label = 'Pending';
-                    } else if (pmt.status === 'UNMATCHED') {
-                      badgeClass = 'bg-[#FEE2E2] text-[#DC2626] border-red-200';
-                      label = 'Unmatched';
-                    }
+                      if (pmt.status === 'PENDING') {
+                        badgeClass = 'bg-[#FEF3C7] text-[#D97706] border-amber-200';
+                        label = 'Pending';
+                      } else if (pmt.status === 'UNMATCHED') {
+                        badgeClass = 'bg-[#FEE2E2] text-[#DC2626] border-red-200';
+                        label = 'Unmatched';
+                      }
 
-                    return (
-                      <tr key={pmt.id} className="hover:bg-slate-50/70 transition">
-                        <td className="py-3 pr-2">
-                          <div className="font-bold text-slate-900">{pmt.studentName}</div>
-                          <div className="text-[11px] text-slate-500">
-                            {pmt.parentName} • {pmt.grade}
-                          </div>
-                        </td>
-                        <td className="py-3 font-black text-slate-900">
-                          {formatNaira(pmt.amountKobo, true)}
-                        </td>
-                        <td className="py-3 hidden sm:table-cell text-slate-600 font-medium">
-                          {pmt.method}
-                        </td>
-                        <td className="py-3 hidden md:table-cell text-slate-400">
-                          {pmt.date}
-                        </td>
-                        <td className="py-3 text-right">
-                          <span
-                            className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeClass}`}
-                          >
-                            {label}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                      return (
+                        <tr key={pmt.id} className="hover:bg-slate-50/70 transition">
+                          <td className="py-3 pr-2">
+                            <div className="font-bold text-slate-900">{pmt.studentName}</div>
+                            <div className="text-[11px] text-slate-500">
+                              {pmt.parentName} • {pmt.grade}
+                            </div>
+                          </td>
+                          <td className="py-3 font-black text-slate-900">
+                            {formatNaira(pmt.amountKobo, true)}
+                          </td>
+                          <td className="py-3 hidden sm:table-cell text-slate-600 font-medium">
+                            {pmt.method}
+                          </td>
+                          <td className="py-3 hidden md:table-cell text-slate-400">
+                            {pmt.date}
+                          </td>
+                          <td className="py-3 text-right">
+                            <span
+                              className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeClass}`}
+                            >
+                              {label}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
 
@@ -869,7 +816,7 @@ export default function DashboardOverview({
             <button
               type="button"
               onClick={onOpenCashModal}
-              className="text-[#10B981] font-semibold hover:underline"
+              className="text-[#10B981] font-semibold hover:underline cursor-pointer"
             >
               + Record counter cash
             </button>
@@ -887,31 +834,41 @@ export default function DashboardOverview({
             </div>
 
             <div className="mt-4 space-y-3.5">
-              {classBreakdown.map((item) => {
-                const isHigh = item.rate >= 80;
-                const isMid = item.rate >= 60 && item.rate < 80;
-                const barColor = isHigh ? 'bg-[#10B981]' : isMid ? 'bg-[#3B82F6]' : 'bg-[#F59E0B]';
+              {classBreakdown.length === 0 ? (
+                <div className="py-8 text-center text-slate-400">
+                  <Users className="w-8 h-8 mx-auto mb-2 stroke-1 opacity-60" />
+                  <p className="text-xs font-medium text-slate-600">No grade breakdown data yet.</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    Register students to track cohort performance.
+                  </p>
+                </div>
+              ) : (
+                classBreakdown.map((item) => {
+                  const isHigh = item.rate >= 80;
+                  const isMid = item.rate >= 60 && item.rate < 80;
+                  const barColor = isHigh ? 'bg-[#10B981]' : isMid ? 'bg-[#3B82F6]' : 'bg-[#F59E0B]';
 
-                return (
-                  <div key={item.name} className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-slate-800">{item.name}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-slate-400 font-medium hidden sm:inline">
-                          {formatNaira(item.totalPaidKobo, true)}
-                        </span>
-                        <span className="font-black text-slate-900">{item.rate}%</span>
+                  return (
+                    <div key={item.name} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-bold text-slate-800">{item.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-400 font-medium hidden sm:inline">
+                            {formatNaira(item.totalPaidKobo, true)}
+                          </span>
+                          <span className="font-black text-slate-900">{item.rate}%</span>
+                        </div>
+                      </div>
+                      <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                        <div
+                          className={`${barColor} h-full rounded-full transition-all duration-500`}
+                          style={{ width: `${Math.min(100, item.rate)}%` }}
+                        />
                       </div>
                     </div>
-                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                      <div
-                        className={`${barColor} h-full rounded-full transition-all duration-500`}
-                        style={{ width: `${Math.min(100, item.rate)}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
 

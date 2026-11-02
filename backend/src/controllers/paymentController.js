@@ -48,12 +48,7 @@ export const handlePaymentWebhook = async (req, res) => {
       });
     }
 
-    // Determine target school ID (default to first available school if unknown DVA)
-    let schoolId = req.body.schoolId;
-    if (!schoolId) {
-      const defaultSchool = await prisma.school.findFirst();
-      schoolId = defaultSchool ? defaultSchool.id : null;
-    }
+    let schoolId = req.body.schoolId || req.user?.schoolId || null;
 
     // 2. DVA Lookup: Find student by Virtual Account Number
     const virtualAccount = await prisma.virtualAccount.findUnique({
@@ -72,6 +67,13 @@ export const handlePaymentWebhook = async (req, res) => {
 
     // Exception Case A: Virtual Account not found in active student database
     if (!virtualAccount) {
+      if (!schoolId) {
+        return res.status(400).json({
+          error: 'Unrecognized virtual account.',
+          message: 'Virtual account number was not recognized and schoolId was not provided.'
+        });
+      }
+
       const suspenseItem = await prisma.suspenseTransaction.create({
         data: {
           schoolId,

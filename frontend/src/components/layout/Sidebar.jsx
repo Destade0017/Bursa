@@ -163,23 +163,7 @@ export default function Sidebar({
           )}
         </div>
 
-        {/* Active School Badge Card */}
-        <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/60">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0">
-              <Building2 className="w-3.5 h-3.5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-xs font-bold text-slate-900 truncate leading-tight">
-                {schoolName}
-              </div>
-              <div className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span className="truncate">First Term 2026/2027</span>
-              </div>
-            </div>
-          </div>
-        </div>
+
       </div>
 
       {/* Navigation Links (Scrollable area) */}

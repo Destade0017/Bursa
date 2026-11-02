@@ -62,12 +62,11 @@ export default function App() {
       const matched = schoolsData.find((s) => s.id === targetSchoolId);
       if (matched) return matched;
     }
-    // IfcurrentUser has a school object attached directly on login payload, use it
     if (currentUser?.school) return currentUser.school;
-    return schoolsData.length > 0 ? schoolsData[0] : null;
+    return null;
   }, [schoolsData, currentUser]);
 
-  const schoolId = currentUser?.schoolId || selectedSchool?.id;
+  const schoolId = currentUser?.schoolId || currentUser?.school?.id || selectedSchool?.id || null;
 
   const {
     data: students = [],
@@ -165,6 +164,7 @@ export default function App() {
   const handleLogout = () => {
     localStorage.removeItem('bursar_token');
     localStorage.removeItem('bursar_user');
+    queryClient.clear();
     setToken(null);
     setCurrentUser(null);
   };
